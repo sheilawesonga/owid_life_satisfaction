@@ -5,6 +5,13 @@ date: "2024-04-24"
 output: html_document
 ---
 
+```{=html}
+<style>
+h1 {
+    font-family: Playfair Display, Georgia, Times New Roman, "Liberation Serif", serif;
+}
+</style>
+```
 ```{r include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
@@ -67,8 +74,10 @@ happy_people_chart <-
   filter(Country %in% c("Finland", "Germany", "Denmark", "Hungary", "Italy", "Japan")) %>% 
   ggplot( aes(x = Year, y = `Happiness: Happy (aggregate)`, color = Country)) +
   geom_line() +
-  labs(x = NULL,
-       y = NULL, 
+  labs(x = "Year",
+       y = "Count", 
+       title = "A line graph showing the number of people who are happy in five countries",
+       subtitle = "This is from 1984 to 2022",
        color = NULL) +
   theme_minimal() 
 
@@ -110,7 +119,15 @@ bscols(
 ```
 
 
-
+```{=html}
+<script>
+function filter_default() {
+  var default_countries = ["Finland", "Germany", "Denmark", "Hungary", "Italy", "Japan"]; // Set default countries here
+  document.getElementById("country_filter").getElementsByClassName("selectized")[0].selectize.setValue(default_countries, false);
+}
+window.onload = filter_default;
+</script>
+```
 
 
 
