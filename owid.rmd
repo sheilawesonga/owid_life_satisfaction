@@ -86,7 +86,7 @@ happy_people_chart
 ggplotly(happy_people_chart, width = 940)
 ```
 
-## Advanced
+## Advanced option
 
 ```{r}
 pacman::p_load(crosstalk)
