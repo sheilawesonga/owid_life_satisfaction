@@ -1,0 +1,123 @@
+---
+title: "Share of people who say that they are happy,1984 to 2022"
+author: "Sheila"
+date: "2024-04-24"
+output: html_document
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+#Load packages
+if(!require(pacman))install.packages("pacman")
+pacman::p_load(plotly,tidyverse,reactable)
+```
+
+```{r}
+#Load data
+happy_people <- read_csv("data/share-of-people-who-say-they-are-happy.csv") %>% 
+  rename(Country = Entity)
+
+```
+
+"Please imagine a ladder, with steps numbered from 0 at the bottom to 10 at the top. The top of the ladder represents the best possible life for you and the bottom of the ladder represents the worst possible life for you. On which step of the ladder would you say you personally feel you stand at this time?"
+
+# {.tabset}
+
+## Table
+
+```{r}
+happy_people %>% 
+  filter(Year %in% c(1984,2022)) %>% 
+  pivot_wider(names_from = Year, values_from = `Happiness: Happy (aggregate)`, 
+              id_cols = Country) %>% 
+  select(Country,`1984`,`2022`) %>% 
+  mutate(`Absolute change` = round(`2022` - `1984`, 3)) %>% 
+  mutate(`Relative change` = (`2022` - `1984`) / `1984`) %>% 
+  reactable(
+    columns = list(`Relative change` = colDef(format = colFormat(percent = TRUE, digits = 1))) 
+  )
+```
+
+
+## Map
+
+```{r}
+happy_people %>% 
+  mutate(`Happiness: Happy (aggregate)` = round(`Happiness: Happy (aggregate)`, 2)) %>%
+  plot_geo(width = 940) %>% 
+  add_trace(
+    z = ~`Happiness: Happy (aggregate)`,
+    color = ~`Happiness: Happy (aggregate)`,
+    locations = ~Code,
+    text = ~Country,
+    frame = ~Year, colors = "YlGn"
+  ) %>% 
+  colorbar(title = NULL)
+```
+
+
+## Chart
+
+```{r}
+# simple line chart of the data, for five countries on different continents (ggplot, piped into ggplotly)
+
+happy_people_chart <- 
+  happy_people %>% 
+  filter(Country %in% c("Finland", "Germany", "Denmark", "Hungary", "Italy", "Japan")) %>% 
+  ggplot( aes(x = Year, y = `Happiness: Happy (aggregate)`, color = Country)) +
+  geom_line() +
+  labs(x = NULL,
+       y = NULL, 
+       color = NULL) +
+  theme_minimal() 
+
+happy_people_chart
+
+ggplotly(happy_people_chart, width = 940)
+```
+
+## Advanced
+
+```{r}
+pacman::p_load(crosstalk)
+
+
+# Crosstalk shared data
+shared_happy_people <- highlight_key(happy_people)
+
+happy_people_plotly <- plot_ly(
+  shared_happy_people, 
+  x = ~Year, 
+  y = ~`Happiness: Happy (aggregate)`, 
+  color = ~Country, 
+  type = "scatter", 
+  mode = "lines+markers"
+) 
+
+
+country_filter <- filter_select(
+  "country_filter", 
+  "Select a country to examine", 
+  shared_happy_people, 
+  ~Country, 
+  multiple = TRUE
+)
+
+bscols(
+  list(country_filter, happy_people_plotly)
+)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
